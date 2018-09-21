@@ -36,8 +36,8 @@ module.exports = class {
   }
 
   /**
-   * Returns an Express app object that exposes price info (RISE/USD and RISE/BTC) on HTTP(S) GET this.pricePathName (/rise_prices is the default path); if no Express app is given, a new one is created and returned
-   * @param {object} app Express app object
+   * Returns an Express app that exposes price info (RISE/USD and RISE/BTC) on HTTP(S) GET this.pricePathName (/rise_prices is the default path); if no Express app is given, a new one is created and returned
+   * @param {function} app Express app
    * @param {string} [basePathName=''] Optional base path that precedes the price path name
    */
   getExpressAppWithPricewatcher (app = express(), basePathName = '') {

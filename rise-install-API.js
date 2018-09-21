@@ -48,7 +48,7 @@ module.exports = class {
     }
     const fns = this.excludeUnwantedFunctionsFromAPI(apiLibraries, excludeFunctions)
     this.riseFullAPI = apiLibraries.map((val, index) => [apiLibraries[index], fns[index]])
-    this.app = (expressApp && typeof expressApp === 'object') ? this.getExpressAppWithRiseAPI(expressApp) : undefined
+    this.app = (expressApp && typeof expressApp === 'function') ? this.getExpressAppWithRiseAPI(expressApp) : undefined
     return { rise: this.r, riseAPI: this.riseAPI, riseFullAPI: this.riseFullAPI, validateQuery: this.validateQuery, validateParams: this.validateParams, app: this.app, getExpressAppWithRiseAPI: this.getExpressAppWithRiseAPI, excludeUnwantedFunctionsFromAPI: this.excludeUnwantedFunctionsFromAPI }
   }
 
@@ -68,8 +68,8 @@ module.exports = class {
   }
 
   /**
-   * Returns an Express app object that has access to the RISE API and allows handling queries by HTTP GET; The length (i.e. number of different parts of the path) is significant as it triggers the RISE API (default lengths are 3 and 4); You can change the lengths by providing a basePathName; if no Express app is given, a new one is created and returned
-   * @param {object} app Express app object
+   * Returns an Express app that has access to the RISE API and allows handling queries by HTTP GET; The length (i.e. number of different parts of the path) is significant as it triggers the RISE API (default lengths are 3 and 4); You can change the lengths by providing a basePathName; if no Express app is given, a new one is created and returned
+   * @param {function} app Express app object
    * @param {string} [basePathName=''] Base path name added on top of the paths used by the RISE API; this should only be set if you want to change the path lengths reserved by the RISE API
    * @param {object} RISE Object that was created by this module (or has the exact same signature) that is used to map the functionality of the RISE API to the server
    */

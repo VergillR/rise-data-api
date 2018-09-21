@@ -172,8 +172,8 @@ module.exports = class {
   }
 
   /**
-   * Returns an Express app object that acts as a data source which has access to certain functions of the RISE API and makes them available to be used by the outside world and extension apps; allows handling queries sent by extension apps by HTTP(S) GET; You can change the basePathName if a path should precede the listener paths (i.e. you do not want the listener paths to be attached directly to the main directory); if no Express app is given, a new one is created and returned
-   * @param {object} app Express app object
+   * Returns an Express app that acts as a data source which has access to certain functions of the RISE API and makes them available to be used by the outside world and extension apps; allows handling queries sent by extension apps by HTTP(S) GET; You can change the basePathName if a path should precede the listener paths (i.e. you do not want the listener paths to be attached directly to the main directory); if no Express app is given, a new one is created and returned
+   * @param {function} app Express app
    * @param {string} [basePathName=''] Optional base path that precedes the listener paths
    */
   getExpressAppWithListener (app = express(), basePathName = '') {
