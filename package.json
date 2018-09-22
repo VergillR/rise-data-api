@@ -15,6 +15,7 @@
   "license": "MIT",
   "dependencies": {
     "express": "^4.16.3",
+    "rise-server-api": "^1.0.5",
     "risejs": "^1.4.0"
   }
 }

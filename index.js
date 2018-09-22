@@ -5,7 +5,7 @@ const publicPath = path.join(__dirname, 'public')
 app.use(express.static(publicPath))
 const port = process.env.PORT || 3000
 
-/* rise-install-API brings the functionality of the RISE API to the server; it is a stand-alone module
+/* rise-server-api brings the functionality of the RISE API to the server; it is a stand-alone module
  * Depending on whether the function needs single arguments (params) or a query object, HTTP(S) GET requests should be in the form:
  * /apilibrary/function
  * /apilibrary/function/params?param=100
@@ -15,7 +15,7 @@ const port = process.env.PORT || 3000
  * /accounts/getBalance/params?address=7889374079483640385R
  * /transactions/getList/query?limit=50&senderId=7889374079483640385R&and:fromHeight=1318634&and:toHeight=1318834
 */
-const RISE = require('./rise-install-API')
+const RISE = require('rise-server-api')
 const rise = new RISE()
 app = rise.getExpressAppWithRiseAPI(app)
 
