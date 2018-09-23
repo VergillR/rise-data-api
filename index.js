@@ -16,7 +16,7 @@ const port = process.env.PORT || 3000
  * /transactions/getList/query?limit=50&senderId=7889374079483640385R&and:fromHeight=1318634&and:toHeight=1318834
 */
 const RISE = require('rise-server-api')
-const rise = new RISE()
+const rise = new RISE({ basePathName: '/rise/api' })
 app = rise.getExpressAppWithRiseAPI(app)
 
 // rise-listener-datasource is optional and allows the server to act as a data source for extension apps; it can also show price information; it is a stand-alone module
