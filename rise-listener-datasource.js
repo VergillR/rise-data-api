@@ -166,7 +166,7 @@ module.exports = class {
       } else {
         rise.transactions.getList(query).then((data) => {
           resolve(data.transactions.length > 0 ? data.transactions : [])
-        }).catch((err) => console.error(err))
+        }).catch((err) => { console.error(err); resolve([]) })
       }
     })
   }
