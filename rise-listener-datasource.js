@@ -97,7 +97,7 @@ module.exports = class {
     return new Promise((resolve, reject) => {
       rise.accounts.getAccount(address).then((data) => {
         resolve(data.success && data.account ? data : {})
-      }).catch((err) => { console.error(err) })
+      }).catch(() => { resolve({}) })
     })
   }
 
@@ -109,7 +109,7 @@ module.exports = class {
     return new Promise((resolve, reject) => {
       rise.accounts.getDelegates(address).then((data) => {
         resolve(data.success && data.delegates ? data : {})
-      }).catch((err) => { console.error(err) })
+      }).catch(() => { resolve({}) })
     })
   }
 
@@ -147,10 +147,10 @@ module.exports = class {
         }
       }
       try {
-        Promise.all([this.fetchQueryResult(queries[0]), this.fetchQueryResult(queries[1]), this.fetchQueryResult(queries[2]), this.fetchQueryResult(queries[3]), this.fetchQueryResult(queries[4])]).then((resultingArray) => resolve(callback(resultingArray.filter((el) => el.length > 0).sort(this.compare)))).catch((err) => { console.error(err); reject(err) })
+        Promise.all([this.fetchQueryResult(queries[0]), this.fetchQueryResult(queries[1]), this.fetchQueryResult(queries[2]), this.fetchQueryResult(queries[3]), this.fetchQueryResult(queries[4])]).then((resultingArray) => resolve(callback(resultingArray.filter((el) => el.length > 0).sort(this.compare)))).catch((err) => { console.error(err); resolve([]) })
       } catch (err) {
         console.error(err)
-        reject(err)
+        resolve([])
       }
     })
   }
@@ -166,7 +166,7 @@ module.exports = class {
       } else {
         rise.transactions.getList(query).then((data) => {
           resolve(data.transactions && data.transactions.length > 0 ? data.transactions : [])
-        }).catch((err) => { console.error(err); resolve([]) })
+        }).catch(() => { resolve([]) })
       }
     })
   }
