@@ -246,10 +246,17 @@ module.exports = class {
 
   /**
    * Returns last transactions
-   * @returns {Object[]} Latest transactions
+   * @returns {Object} Object containing latest transactions
    */
   getTransactions () {
-    return this.lastTransactions.concat(this.previousLastTransactions)
+    const resultObj = { success: true }
+    const transactions1 = this.lastTransactions.transactions ? this.lastTransactions.transactions : []
+    const transactions2 = this.previousLastTransactions.transactions ? this.previousLastTransactions.transactions : []
+    resultObj.transactions = transactions1.concat(transactions2)
+    const count1 = parseInt(this.lastTransactions.count, 10) ? parseInt(this.lastTransactions.count, 10) : 0
+    const count2 = parseInt(this.previousLastTransactions.count, 10) ? parseInt(this.previousLastTransactions.count, 10) : 0
+    resultObj.count = count1 + count2
+    return resultObj
   }
 
   /**
@@ -350,23 +357,16 @@ module.exports = class {
       let query = { fromHeight: oldestBlockRequested, limit: 1000 }
       rise.transactions.getList(query).then((res) => {
         try {
-          if (res.success) {
+          if (res.success && res.transactions) {
             console.log('Before update:')
             console.log('previousLastTransactions: ', this.previousLastTransactions)
             console.log('lastTransactions: ', this.lastTransactions)
-            if (res.transactions && res.transactions.length > 0) this.lastNonEmptyTransactions = res
+            if (res.transactions.length > 0) this.lastNonEmptyTransactions = res
             this.previousLastTransactions = this.lastTransactions
             this.lastTransactions = res
             console.log('response is ', res)
-            const resultObj = { success: true }
-            const transactions1 = this.lastTransactions.transactions ? this.lastTransactions.transactions : []
-            const transactions2 = this.previousLastTransactions.transactions ? this.previousLastTransactions.transactions : []
-            resultObj.transactions = transactions1.concat(transactions2)
-            const count1 = parseInt(this.lastTransactions.count, 10) ? parseInt(this.lastTransactions.count, 10) : 0
-            const count2 = parseInt(this.previousLastTransactions.count, 10) ? parseInt(this.previousLastTransactions.count, 10) : 0
-            resultObj.count = count1 + count2
-            console.log('resultObj is ', resultObj)
-            this.onTriggerCallback(resultObj, this.getStatus(), this.lastNonEmptyTransactions)
+            console.log('resultObj is ', this.getTransactions())
+            this.onTriggerCallback(this.getTransactions(), this.getStatus(), this.lastNonEmptyTransactions)
             // try {
             //   if (res.transactions.length > 0) {
             //     // this.lastTransactions.transactions.sort(this.compare)
@@ -381,6 +381,8 @@ module.exports = class {
             // } catch (e) {
             //   console.error(e)
             // }
+          } else {
+            console.warn('Response was not in correct format')
           }
         } catch (e) {
           console.error(e)
