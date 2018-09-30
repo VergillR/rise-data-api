@@ -65,12 +65,12 @@ module.exports = class {
    */
   async fetchAccountInfo (addresses = [], includeDelegateInfo = false, callback = () => {}) {
     const allInfo = [ null, null, null, null, null ]
+    let noErrors = true
     if (!Array.isArray(addresses) || addresses.length === 0) {
-      const allAddressesInvalid = [0]
-      callback(allAddressesInvalid)
+      callback([0])
     } else {
       let j = 0
-      while (j < addresses.length) {
+      while (j < addresses.length && noErrors) {
         try {
           const validAddress = addresses[j].match(/^\d{15,30}R$/)
           if (validAddress) {
@@ -89,10 +89,12 @@ module.exports = class {
           } else {
             allInfo[j] = {}
           }
-        } catch (e) {}
+        } catch (e) {
+          noErrors = false
+        }
         j++
       }
-      callback(allInfo)
+      (noErrors) ? callback(allInfo) : callback([])
     }
   }
 
