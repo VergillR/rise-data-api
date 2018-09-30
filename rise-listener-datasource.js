@@ -64,30 +64,36 @@ module.exports = class {
    * @param {function} [callback=()=>{}] Function to be called after the query was received
    */
   async fetchAccountInfo (addresses = [], includeDelegateInfo = false, callback = () => {}) {
-    if (!Array.isArray(addresses) || addresses.length === 0) return []
-    let j = 0
     const allInfo = [ null, null, null, null, null ]
-    while (j < addresses.length) {
-      try {
-        const validAddress = addresses[j].match(/^\d{15,30}R$/)
-        if (validAddress) {
-          let resultAccounts = {}
-          let resultDelegates = {}
-          let resultRegistration = {}
-          resultAccounts = await this.fetchAccountResult(addresses[j])
-          if (includeDelegateInfo) {
-            resultDelegates = await this.fetchDelegateResult(addresses[j])
-            if (resultAccounts.account && typeof resultAccounts.account.publicKey === 'string') {
-              resultRegistration = await this.fetchRegistrationResult(resultAccounts.account.publicKey)
+    if (!Array.isArray(addresses) || addresses.length === 0) {
+      const allAddressesInvalid = [0]
+      callback(allAddressesInvalid)
+    } else {
+      let j = 0
+      while (j < addresses.length) {
+        try {
+          const validAddress = addresses[j].match(/^\d{15,30}R$/)
+          if (validAddress) {
+            let resultAccounts = {}
+            let resultDelegates = {}
+            let resultRegistration = {}
+            resultAccounts = await this.fetchAccountResult(addresses[j])
+            if (includeDelegateInfo) {
+              resultDelegates = await this.fetchDelegateResult(addresses[j])
+              if (resultAccounts.account && typeof resultAccounts.account.publicKey === 'string') {
+                resultRegistration = await this.fetchRegistrationResult(resultAccounts.account.publicKey)
+              }
             }
+            // the resulting object thus looks like { success: boolean, account: Object, delegates?: Object, delegate?: Object }
+            allInfo[j] = Object.assign({}, resultAccounts, resultDelegates, resultRegistration)
+          } else {
+            allInfo[j] = {}
           }
-          // the resulting object thus looks like { success: boolean, account: Object, delegates?: Object, delegate?: Object }
-          allInfo[j] = Object.assign({}, resultAccounts, resultDelegates, resultRegistration)
-        }
-      } catch (e) {}
-      j++
+        } catch (e) {}
+        j++
+      }
+      callback(allInfo)
     }
-    callback(allInfo)
   }
 
   /**
@@ -133,10 +139,10 @@ module.exports = class {
    * @param {string[]} addresses Array containing the RISE addresses that are of interest
    * @param {function} callback Function to be called after the query was received
    */
-  async fetchList (type = 1, blockheight = 1000, addresses = [], callback = () => {}) {
+  async fetchList (type = 1, blockheight = 1000000, addresses = [], callback = () => {}) {
     // type 1 is all, 2 is only incoming, 3 is only outgoing
     return new Promise((resolve, reject) => {
-      if (addresses.length === 0) resolve([])
+      if (addresses.length === 0) resolve([0])
 
       let queries = [ null, null, null, null, null ]
       for (let i = 0; i < addresses.length; i++) {
@@ -252,7 +258,7 @@ module.exports = class {
     const resultObj = { success: true }
     const transactions1 = this.lastTransactions.transactions ? this.lastTransactions.transactions : []
     const transactions2 = this.previousLastTransactions.transactions ? this.previousLastTransactions.transactions : []
-    resultObj.transactions = transactions1.concat(transactions2)
+    resultObj.transactions = transactions1.concat(transactions2).sort(this.compare)
     const count1 = parseInt(this.lastTransactions.count, 10) ? parseInt(this.lastTransactions.count, 10) : 0
     const count2 = parseInt(this.previousLastTransactions.count, 10) ? parseInt(this.previousLastTransactions.count, 10) : 0
     resultObj.count = count1 + count2
