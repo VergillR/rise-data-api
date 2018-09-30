@@ -142,7 +142,7 @@ module.exports = class {
   async fetchList (type = 1, blockheight = 1000000, addresses = [], callback = () => {}) {
     // type 1 is all, 2 is only incoming, 3 is only outgoing
     return new Promise((resolve, reject) => {
-      if (addresses.length === 0) resolve([0])
+      if (addresses.length === 0) resolve(callback([0]))
 
       let queries = [ null, null, null, null, null ]
       for (let i = 0; i < addresses.length; i++) {
@@ -154,10 +154,10 @@ module.exports = class {
         }
       }
       try {
-        Promise.all([this.fetchQueryResult(queries[0]), this.fetchQueryResult(queries[1]), this.fetchQueryResult(queries[2]), this.fetchQueryResult(queries[3]), this.fetchQueryResult(queries[4])]).then((resultingArray) => resolve(callback(resultingArray.filter((el) => el.length > 0).sort(this.compare)))).catch((err) => { console.error(err); resolve([]) })
+        Promise.all([this.fetchQueryResult(queries[0]), this.fetchQueryResult(queries[1]), this.fetchQueryResult(queries[2]), this.fetchQueryResult(queries[3]), this.fetchQueryResult(queries[4])]).then((resultingArray) => resolve(callback(resultingArray.filter((el) => el.length > 0).sort(this.compare)))).catch((err) => { console.error(err); resolve(callback([])) })
       } catch (err) {
         console.error(err)
-        resolve([])
+        resolve(callback([]))
       }
     })
   }
