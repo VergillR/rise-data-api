@@ -10,7 +10,7 @@ module.exports = class {
    * @constructor
    * @param {{ nodes: string[], pollTime: number, autostart: boolean, checkOnStartup: boolean, maxInitialBlocks: number, cycleNodesIfTooManyErrors: boolean,  errorTreshold: number, enablePricewatch: boolean, setupPricewatch: object, onTriggerCallback: function }} settings Creates the settings of the listener; also sets up the pricewatcher if needed
    */
-  constructor ({ nodes = ['https://wallet.rise.vision'], pollTime = 90, autostart = true, checkOnStartup = false, maxInitialBlocks = 240, cycleNodesIfTooManyErrors = true, errorTreshold = 3, enablePricewatch = true, setupPricewatch = { source: 'https://api.coinmarketcap.com/v1/ticker/RISE/', pollTime: 600, autostart: true, pricePathName: '/rise_prices' }, onTriggerCallback = this.onUpdate } = {}) {
+  constructor ({ nodes = ['https://wallet.rise.vision'], pollTime = 90, autostart = true, checkOnStartup = false, maxInitialBlocks = 240, cycleNodesIfTooManyErrors = true, errorTreshold = 3, enablePricewatch = true, setupPricewatch = { source: 'https://api.coinmarketcap.com/v1/ticker/RISE/', minPollTime: 480, maxPollTime: 540, autostart: true, pricePathName: '/rise_prices' }, onTriggerCallback = this.onUpdate } = {}) {
     this.nodes = nodes
     this.nodeIndex = 0
     this.node = this.nodes[this.nodeIndex]
@@ -26,6 +26,7 @@ module.exports = class {
     this.lowestPollTime = 30
     this.highestPollTime = 600
     this.lastTransactions = []
+    this.previousLastTransactions = []
     this.lastNonEmptyTransactions = []
     this.lastBlockHeightChecked = 0
     this.lastTimeChecked = 0
@@ -248,7 +249,7 @@ module.exports = class {
    * @returns {Object[]} Latest transactions
    */
   getTransactions () {
-    return this.lastTransactions
+    return this.lastTransactions.concat(this.previousLastTransactions)
   }
 
   /**
@@ -348,21 +349,41 @@ module.exports = class {
       this.lastBlockHeightChecked = height
       let query = { fromHeight: oldestBlockRequested, limit: 1000 }
       rise.transactions.getList(query).then((res) => {
-        if (res.success) {
-          this.lastTransactions = res
-          try {
-            if (res.transactions.length > 0) {
-              this.lastTransactions.transactions.sort(this.compare)
-              this.lastNonEmptyTransactions = res
-              setTimeout(() => {
-                this.onTriggerCallback(this.lastTransactions, this.getStatus(), this.lastNonEmptyTransactions)
-              }, Math.min(res.transactions.length, 10000))
-            } else {
-              this.onTriggerCallback(this.lastTransactions, this.getStatus(), this.lastNonEmptyTransactions)
-            }
-          } catch (e) {
-            console.error(e)
+        try {
+          if (res.success) {
+            console.log('Before update:')
+            console.log('previousLastTransactions: ', this.previousLastTransactions)
+            console.log('lastTransactions: ', this.lastTransactions)
+            if (res.transactions && res.transactions.length > 0) this.lastNonEmptyTransactions = res
+            this.previousLastTransactions = this.lastTransactions
+            this.lastTransactions = res
+            console.log('response is ', res)
+            const resultObj = { success: true }
+            const transactions1 = this.lastTransactions.transactions ? this.lastTransactions.transactions : []
+            const transactions2 = this.previousLastTransactions.transactions ? this.previousLastTransactions.transactions : []
+            resultObj.transactions = transactions1.concat(transactions2)
+            const count1 = parseInt(this.lastTransactions.count, 10) ? parseInt(this.lastTransactions.count, 10) : 0
+            const count2 = parseInt(this.previousLastTransactions.count, 10) ? parseInt(this.previousLastTransactions.count, 10) : 0
+            resultObj.count = count1 + count2
+            console.log('resultObj is ', resultObj)
+            this.onTriggerCallback(resultObj, this.getStatus(), this.lastNonEmptyTransactions)
+            // try {
+            //   if (res.transactions.length > 0) {
+            //     // this.lastTransactions.transactions.sort(this.compare)
+            //     this.lastNonEmptyTransactions = res
+            //     this.onTriggerCallback(resultObj, this.getStatus(), this.lastNonEmptyTransactions)
+            //     // setTimeout(() => {
+            //     //   this.onTriggerCallback(this.lastTransactions.concat(this.previousLastTransactions), this.getStatus(), this.lastNonEmptyTransactions)
+            //     // }, Math.min(res.transactions.length, 10000))
+            //   } else {
+            //     this.onTriggerCallback(this.previousLastTransactions, this.getStatus(), this.lastNonEmptyTransactions)
+            //   }
+            // } catch (e) {
+            //   console.error(e)
+            // }
           }
+        } catch (e) {
+          console.error(e)
         }
       }).catch((err) => this.handleUpdateError(err))
     }).catch((err) => this.handleUpdateError(err))

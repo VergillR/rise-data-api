@@ -6,9 +6,9 @@ module.exports = class {
    * @constructor
    * @param {{ sources: string[], pollTime: number, autostart: boolean, checkOnStartup: boolean, onTriggerCallback: function }} settings Creates the settings of the listener
    */
-  constructor ({ source = 'https://api.coinmarketcap.com/v1/ticker/RISE/', pollTime = 600, checkOnStartup = true, autostart = true, pricePathName = '/rise_prices' } = {}) {
+  constructor ({ source = 'https://api.coinmarketcap.com/v1/ticker/RISE/', minPollTime = 480, maxPollTime = 540, checkOnStartup = true, autostart = true, pricePathName = '/rise_prices' } = {}) {
     this.source = source
-    this.pollTime = pollTime
+    this.pollTime = minPollTime + Math.floor(Math.random() * (maxPollTime - minPollTime))
     this.pricewatcher = null
     this.priceJson = {}
     this.lowestPollTime = 60
