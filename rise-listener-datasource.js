@@ -10,7 +10,7 @@ module.exports = class {
    * @constructor
    * @param {{ nodes: string[], pollTime: number, autostart: boolean, checkOnStartup: boolean, maxInitialBlocks: number, cycleNodesIfTooManyErrors: boolean,  errorTreshold: number, enablePricewatch: boolean, setupPricewatch: object, onTriggerCallback: function }} settings Creates the settings of the listener; also sets up the pricewatcher if needed
    */
-  constructor ({ nodes = ['https://wallet.rise.vision'], pollTime = 90, autostart = true, checkOnStartup = false, maxInitialBlocks = 240, cycleNodesIfTooManyErrors = true, errorTreshold = 3, enablePricewatch = true, setupPricewatch = { source: 'https://api.coinmarketcap.com/v1/ticker/RISE/', minPollTime: 480, maxPollTime: 540, autostart: true, pricePathName: '/rise_prices' }, onTriggerCallback = this.onUpdate } = {}) {
+  constructor ({ nodes = ['https://wallet.rise.vision'], pollTime = 40, autostart = true, checkOnStartup = false, maxInitialBlocks = 100, cycleNodesIfTooManyErrors = true, errorTreshold = 3, enablePricewatch = true, setupPricewatch = { source: 'https://api.coinmarketcap.com/v1/ticker/RISE/', minPollTime: 480, maxPollTime: 540, autostart: true, pricePathName: '/rise_prices' }, onTriggerCallback = this.onUpdate } = {}) {
     this.nodes = nodes
     this.nodeIndex = 0
     this.node = this.nodes[this.nodeIndex]
@@ -28,7 +28,7 @@ module.exports = class {
     this.lastTransactions = []
     this.previousLastTransactions = []
     this.lastNonEmptyTransactions = []
-    this.lastBlockHeightChecked = 0
+    this.lastUpdatedBlockHeight = 0
     this.lastTimeChecked = 0
     this.watcher = null
 
@@ -239,7 +239,7 @@ module.exports = class {
       message: this.watcher !== null ? 'Service is active and running...' : 'Service is not active',
       node: this.node,
       polltime: this.pollTime,
-      'last-blockheight-checked': this.lastBlockHeightChecked,
+      'last-blockheight-checked': this.lastUpdatedBlockHeight,
       'last-time-checked': this.lastTimeChecked
     }
   }
@@ -348,39 +348,20 @@ module.exports = class {
     this.lastTimeChecked = new Date()
     rise.blocks.getHeight().then(({height}) => {
       this.consecutiveConnectionErrors = 0
-      if (this.lastBlockHeightChecked >= height) {
+      if (this.lastUpdatedBlockHeight >= height) {
         console.warn('Newest block height was not higher than the last checked block height')
         return
       }
-      let oldestBlockRequested = this.lastBlockHeightChecked > 0 ? this.lastBlockHeightChecked : height - this.maxInitialBlocks
-      this.lastBlockHeightChecked = height
-      let query = { fromHeight: oldestBlockRequested, limit: 1000 }
+      let oldestBlockRequired = this.lastUpdatedBlockHeight > 0 ? this.lastUpdatedBlockHeight : height - this.maxInitialBlocks
+      let query = { fromHeight: oldestBlockRequired, limit: 1000 }
       rise.transactions.getList(query).then((res) => {
         try {
           if (res.success && res.transactions) {
-            console.log('Before update:')
-            console.log('previousLastTransactions: ', this.previousLastTransactions)
-            console.log('lastTransactions: ', this.lastTransactions)
+            this.lastUpdatedBlockHeight = height
             if (res.transactions.length > 0) this.lastNonEmptyTransactions = res
             this.previousLastTransactions = this.lastTransactions
             this.lastTransactions = res
-            console.log('response is ', res)
-            console.log('resultObj is ', this.getTransactions())
             this.onTriggerCallback(this.getTransactions(), this.getStatus(), this.lastNonEmptyTransactions)
-            // try {
-            //   if (res.transactions.length > 0) {
-            //     // this.lastTransactions.transactions.sort(this.compare)
-            //     this.lastNonEmptyTransactions = res
-            //     this.onTriggerCallback(resultObj, this.getStatus(), this.lastNonEmptyTransactions)
-            //     // setTimeout(() => {
-            //     //   this.onTriggerCallback(this.lastTransactions.concat(this.previousLastTransactions), this.getStatus(), this.lastNonEmptyTransactions)
-            //     // }, Math.min(res.transactions.length, 10000))
-            //   } else {
-            //     this.onTriggerCallback(this.previousLastTransactions, this.getStatus(), this.lastNonEmptyTransactions)
-            //   }
-            // } catch (e) {
-            //   console.error(e)
-            // }
           } else {
             console.warn('Response was not in correct format')
           }

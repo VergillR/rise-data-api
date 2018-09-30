@@ -21,7 +21,7 @@ app = rise.getExpressAppWithRiseAPI(app)
 
 // rise-listener-datasource is optional and allows the server to act as a data source for extension apps; it can also show price information; it is a stand-alone module
 const Listener = require('./rise-listener-datasource')
-const listener = new Listener({ nodes: ['https://wallet.rise.vision'], pollTime: 90, autostart: true, checkOnStartup: true, enablePricewatch: true })
+const listener = new Listener({ nodes: ['https://wallet.rise.vision'], pollTime: 40, autostart: true, checkOnStartup: true, enablePricewatch: true })
 app = listener.getExpressAppWithListener(app)
 
 app.get('/', (req, res) => {
