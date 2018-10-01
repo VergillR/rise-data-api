@@ -272,16 +272,25 @@ module.exports = class {
   }
 
   /**
-   * Logs the update error and if necessary, switches the active node to the next one on the list of nodes
+   * Logs the update error, retries if the first attempt failed and if necessary, switches the active node to the next one on the list of nodes
    * @param {Error} e Error that was given after a failed update() call
+   * @param {boolean} secondAttempt Whether or not the first attempt failed and a second attempt is made
    */
-  handleUpdateError (e) {
-    console.error(e)
+  handleUpdateError (e, secondAttempt) {
+    // console.error(e)
     if (this.cycleNodesIfTooManyErrors && ++this.consecutiveConnectionErrors >= this.errorTreshold) {
       this.nodeIndex = this.nodeIndex + 1 <= this.nodes.length ? this.nodeIndex + 1 : 0
       this.node = this.nodes[this.nodeIndex]
       rise.nodeAddress = this.node
       this.consecutiveConnectionErrors = 0
+      console.log(`*** Number of ${this.errorTreshold} consecutive errors exceeded: switched to ${this.node} ***`)
+    }
+    if (!secondAttempt) {
+      setTimeout(() => {
+        this.update(true)
+      }, 8000 + Math.floor(Math.random() * 1500))
+    } else {
+      console.error(e)
     }
   }
 
@@ -355,13 +364,14 @@ module.exports = class {
 
   /**
    * Sends a request for a new transaction block from the RISE node and updates system information
+   * @param {boolean} [secondAttempt=false] Whether the update is a first or a second attempt (after the first failed)
    */
-  update () {
+  update (secondAttempt = false) {
     this.lastTimeChecked = new Date()
     rise.blocks.getHeight().then(({height}) => {
       this.consecutiveConnectionErrors = 0
       if (this.lastUpdatedBlockHeight >= height) {
-        console.warn('Newest block height was not higher than the last checked block height')
+        // Given block height was not higher than the last updated block height
         return
       }
       let oldestBlockRequired = this.lastUpdatedBlockHeight > 0 ? this.lastUpdatedBlockHeight : height - this.maxInitialBlocks
@@ -380,7 +390,7 @@ module.exports = class {
         } catch (e) {
           console.error(e)
         }
-      }).catch((err) => this.handleUpdateError(err))
-    }).catch((err) => this.handleUpdateError(err))
+      }).catch((err) => this.handleUpdateError(err, secondAttempt))
+    }).catch((err) => this.handleUpdateError(err, secondAttempt))
   }
 }
