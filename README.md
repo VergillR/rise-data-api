@@ -21,7 +21,7 @@ and then navigate to the directory just created and type `npm install` in the co
 
 Then open a browser, and type in the address bar **localhost:3000**
 
-You can add customizations anywhere in the code (e.g. if you have your own RISE node, use that instead of the default RISE data node or add your own functions).
+You can add customizations anywhere in the code (e.g. if you have your own RISE node, use that instead of the default RISE data node or add your own functions). It's possible to make a cluster of this app with [pm2](https://pm2.io/runtime/).
 
 ### Extensions
 The extensions can be reviewed and installed from GitHub:
