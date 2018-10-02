@@ -280,7 +280,7 @@ module.exports = class {
   handleUpdateError (e, secondAttempt) {
     // console.error(e)
     if (this.cycleNodesIfTooManyErrors && ++this.consecutiveConnectionErrors >= this.errorTreshold) {
-      this.nodeIndex = this.nodeIndex + 1 <= this.nodes.length ? this.nodeIndex + 1 : 0
+      this.nodeIndex = this.nodeIndex + 1 < this.nodes.length ? this.nodeIndex + 1 : 0
       this.node = this.nodes[this.nodeIndex]
       rise.nodeAddress = this.node
       this.consecutiveConnectionErrors = 0
