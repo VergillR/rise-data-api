@@ -278,7 +278,6 @@ module.exports = class {
    * @param {boolean} secondAttempt Whether or not the first attempt failed and a second attempt is made
    */
   handleUpdateError (e, secondAttempt) {
-    // console.error(e)
     if (this.cycleNodesIfTooManyErrors && ++this.consecutiveConnectionErrors >= this.errorTreshold) {
       this.nodeIndex = this.nodeIndex + 1 < this.nodes.length ? this.nodeIndex + 1 : 0
       this.node = this.nodes[this.nodeIndex]
