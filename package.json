@@ -1,7 +1,7 @@
 {
   "name": "rise-data-api",
   "version": "1.0.0",
-  "description": "Exposes the RISE API to a server which can then be send queries by the outside world and return the response to those queries back to the outside world",
+  "description": "Allows the server to act as a data source for extensions; optionally, it also exposes the RISE API which allows the server to function as an interface to the RISE network",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -16,6 +16,6 @@
   "dependencies": {
     "express": "^4.16.3",
     "rise-server-api": "^1.0.5",
-    "risejs": "^1.4.0"
+    "risejs": "^1.4.1"
   }
 }
