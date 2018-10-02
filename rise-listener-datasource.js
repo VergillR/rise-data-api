@@ -1,3 +1,4 @@
+/* eslint-disable standard/no-callback-literal */
 const express = require('express')
 const rise = require('risejs').rise
 const riseRegex = /^\d{15,30}R$/
@@ -8,14 +9,14 @@ let lastNonEmptyTransactions = JSON.stringify(latestTransactions)
 module.exports = class {
   /**
    * @constructor
-   * @param {{ nodes: string[], pollTime: number, autostart: boolean, checkOnStartup: boolean, maxInitialBlocks: number, cycleNodesIfTooManyErrors: boolean,  errorTreshold: number, enablePricewatch: boolean, setupPricewatch: object, onTriggerCallback: function }} settings Creates the settings of the listener; also sets up the pricewatcher if needed
+   * @param {{ nodes: string[], minPollTime: number, maxPollTime: number, autostart: boolean, checkOnStartup: boolean, maxInitialBlocks: number, cycleNodesIfTooManyErrors: boolean,  errorTreshold: number, enablePricewatch: boolean, setupPricewatch: object, onTriggerCallback: function }} settings Creates the settings of the listener; also sets up the pricewatcher if needed
    */
-  constructor ({ nodes = ['https://wallet.rise.vision'], pollTime = 45, autostart = true, checkOnStartup = false, maxInitialBlocks = 100, cycleNodesIfTooManyErrors = true, errorTreshold = 3, enablePricewatch = true, setupPricewatch = { source: 'https://api.coinmarketcap.com/v1/ticker/RISE/', minPollTime: 480, maxPollTime: 540, autostart: true, pricePathName: '/rise_prices' }, onTriggerCallback = this.onUpdate } = {}) {
+  constructor ({ nodes = ['https://wallet.rise.vision'], minPollTime = 44, maxPollTime = 46, autostart = true, checkOnStartup = false, maxInitialBlocks = 100, cycleNodesIfTooManyErrors = true, errorTreshold = 3, enablePricewatch = true, setupPricewatch = { source: 'https://api.coinmarketcap.com/v1/ticker/RISE/', minPollTime: 480, maxPollTime: 540, autostart: true, pricePathName: '/rise_prices' }, onTriggerCallback = this.onUpdate } = {}) {
     this.nodes = nodes
     this.nodeIndex = 0
     this.node = this.nodes[this.nodeIndex]
     rise.nodeAddress = this.node
-    this.pollTime = pollTime
+    this.pollTime = (minPollTime * 1000) + Math.floor(Math.random() * ((maxPollTime - minPollTime) * 1000))
     this.maxInitialBlocks = maxInitialBlocks
     this.onTriggerCallback = onTriggerCallback
 
@@ -314,7 +315,7 @@ module.exports = class {
       if (this.watcher === null) {
         this.watcher = setInterval(() => {
           this.update()
-        }, 1000 * this.pollTime)
+        }, this.pollTime)
       } else {
         console.warn('Watcher is already running. Use stop() first to close the previous watcher and then restart with run().')
       }
