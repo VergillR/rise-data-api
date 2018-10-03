@@ -11,7 +11,7 @@ module.exports = class {
    * @constructor
    * @param {{ nodes: string[], minPollTime: number, maxPollTime: number, autostart: boolean, checkOnStartup: boolean, maxInitialBlocks: number, cycleNodesIfTooManyErrors: boolean,  errorTreshold: number, enablePricewatch: boolean, setupPricewatch: object, onTriggerCallback: function }} settings Creates the settings of the listener; also sets up the pricewatcher if needed
    */
-  constructor ({ nodes = ['https://wallet.rise.vision'], minPollTime = 44, maxPollTime = 46, autostart = true, checkOnStartup = false, maxInitialBlocks = 100, cycleNodesIfTooManyErrors = true, errorTreshold = 3, enablePricewatch = true, setupPricewatch = { source: 'https://api.coinmarketcap.com/v1/ticker/RISE/', minPollTime: 480, maxPollTime: 540, autostart: true, pricePathName: '/rise_prices' }, onTriggerCallback = this.onUpdate } = {}) {
+  constructor ({ nodes = ['https://wallet.rise.vision'], minPollTime = 44, maxPollTime = 46, autostart = true, checkOnStartup = false, maxInitialBlocks = 100, cycleNodesIfTooManyErrors = true, errorTreshold = 3, enablePricewatch = true, setupPricewatch = { source: 'https://api.coinmarketcap.com/v1/ticker/RISE/', minPollTime: 48, maxPollTime: 54, autostart: true, pricePathName: '/rise_prices' }, onTriggerCallback = this.onUpdate } = {}) {
     this.nodes = nodes
     this.nodeIndex = 0
     this.node = this.nodes[this.nodeIndex]
