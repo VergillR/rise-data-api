@@ -61,7 +61,7 @@ module.exports = class {
       if (this.pricewatcher === null) {
         this.pricewatcher = setInterval(() => {
           this.update()
-        }, 1000 * this.pollTime)
+        }, this.pollTime)
       } else {
         console.warn('Pricewatcher is already running. Use stop() first to close the previous watcher and then restart with start().')
       }
