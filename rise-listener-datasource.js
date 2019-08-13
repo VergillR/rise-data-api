@@ -100,7 +100,7 @@ module.exports = class {
       let j = 0;
       while (j < addresses.length && noErrors) {
         try {
-          const validAddress = addresses[j].match(/^\d{15,30}R$/);
+          const validAddress = addresses[j].match(/^\d{1,30}R$/);
           if (validAddress) {
             let resultAccounts = {};
             let resultDelegates = {};
